@@ -29,7 +29,11 @@ namespace CarRentalAPI.Repositories
         }
 
         public void Add(Car car) => _context.Cars.Add(car);
-        public void Update(Car car) => _context.Cars.Update(car);
+        public void Update(Car car)
+        {
+            car.CreatedAt = DateTime.SpecifyKind(car.CreatedAt, DateTimeKind.Utc);
+            _context.Cars.Update(car);
+        }
         public void Delete(Car car) => _context.Cars.Remove(car);
         public void Save() => _context.SaveChanges();
     }

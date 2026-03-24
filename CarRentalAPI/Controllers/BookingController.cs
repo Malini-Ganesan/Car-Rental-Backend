@@ -1,47 +1,142 @@
-﻿using CarRentalAPI.Data;
-using CarRentalAPI.Models;
+﻿using CarRentalAPI.Models;
+using CarRentalAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CarRentalAPI.Controllers
 {
-    [Authorize(Roles = "User")]
     [Route("api/[controller]")]
     [ApiController]
     public class BookingController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IBookingService _bookingService;
 
-        public BookingController(ApplicationDbContext context)
+        public BookingController(IBookingService bookingService)
         {
-            _context = context;
+            _bookingService = bookingService;
         }
+
+        [Authorize(Roles = "User")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Booking booking)
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-                    ?? User.FindFirst("sub")?.Value;
+            try
+            {
+                booking.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                              ?? User.FindFirst("sub")?.Value;
 
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
+                booking.UserName = User.FindFirst("preferred_username")?.Value;
 
-            booking.UserId = userId;
-            booking.StartDate = DateTime.SpecifyKind(booking.StartDate, DateTimeKind.Utc);
-            booking.EndDate = DateTime.SpecifyKind(booking.EndDate, DateTimeKind.Utc);
+                booking.StartDate = booking.StartDate.ToUniversalTime();
+                booking.EndDate = booking.EndDate.ToUniversalTime();
 
-            var overlapping = await _context.Bookings.AnyAsync(b =>
-                b.CarId == booking.CarId &&
-                b.StartDate <= booking.EndDate &&
-                b.EndDate >= booking.StartDate);
+                if (booking.CarId <= 0 || string.IsNullOrEmpty(booking.Location))
+                    return BadRequest("Invalid booking data");
 
-            if (overlapping)
-                return BadRequest("Car already booked for selected dates.");
+                var result = await _bookingService.CreateBookingAsync(booking, booking.UserId);
 
-            _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-            return Ok(booking);
+        [Authorize(Roles = "User")]
+        [HttpGet("my-bookings")]
+        public async Task<IActionResult> MyBookings()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        ?? User.FindFirst("sub")?.Value;
+
+            var bookings = await _bookingService.GetMyBookingsAsync(userId);
+
+            // Include car info
+            var result = bookings.Select(b => new
+            {
+                b.Id,
+                CarName = b.Car != null ? b.Car.Name : "Unknown Car",
+                b.StartDate,
+                b.EndDate,
+                b.Location,
+                b.TotalPrice,
+                b.Status
+            });
+
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("all-bookings")]
+        public async Task<IActionResult> AllBookings()
+        {
+            var bookings = await _bookingService.GetAllBookingsAsync();
+
+            // Include car and user info
+            var result = bookings.Select(b => new
+            {
+                b.Id,
+                CarName = b.Car != null ? b.Car.Name : "Unknown Car",
+                UserName = b.UserName,
+                b.StartDate,
+                b.EndDate,
+                b.Location,
+                b.TotalPrice,
+                b.Status
+            });
+
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var bookings = await _bookingService.GetAllBookingsAsync();
+
+            return Ok(bookings);
+        }
+[HttpGet("check-availability")]
+public async Task<IActionResult> CheckAvailability(
+    int carId,
+    string startDate,
+    string endDate)
+{
+    if (!DateTime.TryParse(startDate, out DateTime start))
+        return BadRequest("Invalid start date");
+
+    if (!DateTime.TryParse(endDate, out DateTime end))
+        return BadRequest("Invalid end date");
+
+    var isBooked = await _bookingService.IsCarBooked(carId, start, end);
+
+    return Ok(new { isBooked });
+}
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _bookingService.DeleteBookingAsync(id);
+
+            return Ok("Booking deleted");
+        }
+
+        [Authorize(Roles = "User, Admin")]
+        [HttpPut("cancel/{id}")]
+        public async Task<IActionResult> Cancel(int id)
+        {
+             try
+             {
+                await _bookingService.CancelBookingAsync(id);
+                return Ok("Booking cancelled");
+             }
+             catch (Exception ex)
+             {
+                return BadRequest(ex.Message);
+             }
         }
     }
 }
