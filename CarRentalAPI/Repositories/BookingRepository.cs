@@ -18,6 +18,7 @@ namespace CarRentalAPI.Repositories
         {
             return await _context.Bookings
                 .Include(b => b.Car)
+                .Where(b => b.Status != "Deleted")
                 .OrderByDescending(b => b.StartDate)
                 .ToListAsync();
         }
@@ -26,7 +27,7 @@ namespace CarRentalAPI.Repositories
         {
             return await _context.Bookings
                 .Include(b => b.Car)
-                .Where(b => b.UserId == userId && b.Status != "Cancelled")
+                .Where(b => b.UserId == userId && b.Status == "Booked")
                 .OrderByDescending(b => b.StartDate)
                 .ToListAsync();
         }

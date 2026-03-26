@@ -14,6 +14,10 @@ namespace CarRentalAPI.Repositories
             _context = context;
         }
 
+        public async Task<IEnumerable<Car>> GetAllAsync()
+        {
+            return await _context.Cars.ToListAsync();
+        }
         public IEnumerable<Car> GetAll()
         {
             return _context.Cars.Include(c => c.Category)

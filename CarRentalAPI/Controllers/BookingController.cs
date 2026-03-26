@@ -114,14 +114,19 @@ public async Task<IActionResult> CheckAvailability(
 
     return Ok(new { isBooked });
 }
-
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _bookingService.DeleteBookingAsync(id);
-
-            return Ok("Booking deleted");
+            try
+            {
+                await _bookingService.DeleteBookingAsync(id);
+                return Ok(new { message = "Booking deleted successfully", id = id });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [Authorize(Roles = "User, Admin")]

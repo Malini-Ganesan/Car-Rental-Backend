@@ -10,5 +10,6 @@ namespace CarRentalAPI.Repositories.Interface
         void Update(Car car);
         void Delete(Car car);
         void Save();
+        Task<IEnumerable<Car>> GetAllAsync();
     }
 }

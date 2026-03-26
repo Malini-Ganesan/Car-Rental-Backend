@@ -54,6 +54,10 @@ namespace CarRentalAPI.Services
             if (booking == null)
                 throw new Exception("Booking not found");
 
+            // Only allow delete if Cancelled
+            if (booking.Status != "Cancelled")
+                throw new Exception("Only cancelled bookings can be deleted");
+
             await _bookingRepo.DeleteAsync(booking);
             await _bookingRepo.SaveAsync();
         }

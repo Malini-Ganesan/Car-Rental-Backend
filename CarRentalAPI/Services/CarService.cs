@@ -16,7 +16,7 @@ public class CarService : ICarService
         _env = env;
     }
 
-    public IEnumerable<CarDto> GetAll()
+        public IEnumerable<CarDto> GetAll()
     {
         return _repo.GetAll().Select(c => new CarDto
         {
