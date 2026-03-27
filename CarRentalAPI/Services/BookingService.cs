@@ -1,6 +1,7 @@
 ﻿using CarRentalAPI.Models;
 using CarRentalAPI.Repositories.Interface;
 using CarRentalAPI.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalAPI.Services
 {
@@ -40,6 +41,10 @@ namespace CarRentalAPI.Services
         public async Task<IEnumerable<Booking>> GetAllBookingsAsync()
         {
             return await _bookingRepo.GetAllAsync();
+        }
+        public async Task<Booking> GetBookingById(int id)
+        {
+            return await _bookingRepo.GetBookingById(id);
         }
 
         public async Task<bool> IsCarBooked(int carId, DateTime startDate, DateTime endDate)

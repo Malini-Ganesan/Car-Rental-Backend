@@ -11,10 +11,13 @@ namespace CarRentalAPI.Controllers;
 public class CarController : ControllerBase
 {
     private readonly ICarService _carService;
+    private readonly NodeRedService _nodeRed;
 
-    public CarController(ICarService carService)
+
+    public CarController(ICarService carService, NodeRedService nodeRed)
     {
         _carService = carService;
+        _nodeRed = nodeRed;
     }
 
     [HttpGet]
@@ -32,9 +35,21 @@ public class CarController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public IActionResult Create([FromForm] CarCreateDto dto)
+    public async Task<IActionResult> Create([FromForm] CarCreateDto dto)
     {
         var car = _carService.Create(dto);
+        try
+        {
+            await _nodeRed.SendEvent(
+                "CAR_CREATED",
+                $"Car {car.Name} created"
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Node-RED failed: " + ex.Message);
+        }
+
         return Ok(car);
     }
 

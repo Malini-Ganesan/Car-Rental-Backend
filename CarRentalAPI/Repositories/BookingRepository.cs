@@ -51,6 +51,13 @@ namespace CarRentalAPI.Repositories
             return await _context.Bookings.FindAsync(id);
         }
 
+        public async Task<Booking> GetBookingById(int id)
+        {
+            return await _context.Bookings
+                .Include(b => b.Car) 
+                .FirstOrDefaultAsync(b => b.Id == id);
+        }
+
         public async Task DeleteAsync(Booking booking)
         {
             _context.Bookings.Remove(booking);

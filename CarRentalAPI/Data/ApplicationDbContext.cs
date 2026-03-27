@@ -14,4 +14,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<CarCategory> CarCategories { get; set; }
     public DbSet<InsurancePlan> InsurancePlans { get; set; }
     public DbSet<Booking> Bookings { get; set; }
+
+    public DbSet<SystemLog> SystemLogs { get; set; }
+
+
 }

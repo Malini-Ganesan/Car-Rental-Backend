@@ -71,6 +71,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient<NodeRedService>();
 
 //cors(angular app)
 builder.Services.AddCors(options =>

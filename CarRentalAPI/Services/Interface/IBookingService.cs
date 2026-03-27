@@ -10,5 +10,6 @@ namespace CarRentalAPI.Services.Interfaces
         Task<bool> IsCarBooked(int carId, DateTime startDate, DateTime endDate);
         Task DeleteBookingAsync(int id);
         Task CancelBookingAsync(int id);
+        Task<Booking> GetBookingById(int id);
     }
 }
