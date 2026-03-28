@@ -1,9 +1,9 @@
-﻿    using CarRentalAPI.Models;
+﻿using CarRentalAPI.Models;
 using CarRentalAPI.Services.Interface;
 using CarRentalAPI.Services.Interfaces;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
     namespace CarRentalAPI.Controllers
     {
@@ -159,7 +159,6 @@ public async Task<IActionResult> Cancel(int id)
 {
     try
     {
-        // 🔥 Get booking BEFORE cancel (to fetch car name)
         var bookingData = await _bookingService.GetBookingById(id);
 
         await _bookingService.CancelBookingAsync(id);
