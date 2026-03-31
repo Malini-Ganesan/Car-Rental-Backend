@@ -36,6 +36,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateAudience = false    ,
             ValidateIssuer = true,
+            ValidIssuers = new[]
+            {
+                "http://localhost:8080/realms/CarRentalRealm",
+                "http://keycloakContainer:8080/realms/CarRentalRealm"
+            },
             NameClaimType = "preferred_username",
             RoleClaimType = ClaimTypes.Role
         };
@@ -79,21 +84,29 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200")
+            policy.WithOrigins("http://localhost:4200", "http://frontend:80")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
 });
 
+builder.WebHost.UseUrls("http://0.0.0.0:5020");
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+// Auto-run migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    //db.Database.Migrate();
+}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseStaticFiles();
 app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.UseSwagger();
-app.UseSwaggerUI();
+
 app.Run();

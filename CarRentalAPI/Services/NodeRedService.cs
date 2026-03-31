@@ -24,7 +24,7 @@ public class NodeRedService
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync("http://localhost:1882/log-event", content);
+        var response = await _httpClient.PostAsync("http://nodered:1882/log-event", content);
 
         if (!response.IsSuccessStatusCode)
         {
