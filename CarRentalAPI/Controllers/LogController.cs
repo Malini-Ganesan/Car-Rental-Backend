@@ -3,26 +3,29 @@ using Microsoft.EntityFrameworkCore;
 using CarRentalAPI.Data;
 using CarRentalAPI.Models;
 
-[Route("api/[controller]")]
-[ApiController]
-public class LogController : ControllerBase
+namespace CarRentalAPI.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public LogController(ApplicationDbContext context)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class LogController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    [HttpGet]
-    public async Task<IActionResult> GetLogs()
-    {
-        var logs = await _context.SystemLogs
-            .Where(x => x.EventType != null)
-            .OrderByDescending(x => x.CreatedAt)
-            .Take(50)
-            .ToListAsync();
+        public LogController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-        return Ok(logs);
+        [HttpGet]
+        public async Task<IActionResult> GetLogs()
+        {
+            var logs = await _context.SystemLogs
+                .Where(x => x.EventType != null)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(50)
+                .ToListAsync();
+
+            return Ok(logs);
+        }
     }
 }

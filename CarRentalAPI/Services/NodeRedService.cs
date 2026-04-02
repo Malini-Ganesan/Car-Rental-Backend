@@ -2,33 +2,36 @@
 using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-public class NodeRedService
+namespace CarRentalAPI.Services
 {
-    private readonly HttpClient _httpClient;
-
-    public NodeRedService(HttpClient httpClient)
+    public class NodeRedService
     {
-        _httpClient = httpClient;
-    }
+        private readonly HttpClient _httpClient;
 
-    public async Task SendEvent(string eventType, string description, object data = null)
-    {
-        var payload = new
+        public NodeRedService(HttpClient httpClient)
         {
-            eventType = eventType,
-            description = description,
-            data = data
-        };
+            _httpClient = httpClient;
+        }
 
-        var json = JsonSerializer.Serialize(payload);
-
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var response = await _httpClient.PostAsync("http://nodered:1882/log-event", content);
-
-        if (!response.IsSuccessStatusCode)
+        public async Task SendEvent(string eventType, string description, object data = null)
         {
-            Console.WriteLine("Node-RED failed");
+            var payload = new
+            {
+                eventType = eventType,
+                description = description,
+                data = data
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("http://nodered:1882/log-event", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Node-RED failed");
+            }
         }
     }
 }

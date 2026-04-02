@@ -3,6 +3,7 @@ using CarRentalAPI.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CarRentalAPI.Models;
+using CarRentalAPI.Services;
 
 namespace CarRentalAPI.Controllers;
 [Authorize]
