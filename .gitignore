@@ -13,3 +13,16 @@ obj/
 
 # Logs
 *.log
+
+# 📄 File: .gitignore (root of your project)
+
+# Kubernetes secrets — never commit
+k8s/app-secrets.yaml
+
+# Backend config with connection strings
+CarRentalAPI/appsettings.json
+CarRentalAPI/appsettings.*.json
+
+# Keep example files (no real values)
+!k8s/app-secrets.example.yaml
+!CarRentalAPI/appsettings.example.json
